@@ -1,0 +1,264 @@
+---
+title: "Travel Time"
+author: "Yifeng Fan"
+date: "2022-12-15"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(esquisse)
+library(ggplot2)
+```
+
+```{r}
+#Import the dataset
+hr_q4_21<- read.csv("HRTravelTimesQ4_21.csv")
+
+lr_q4_21<- read.csv("LRTravelTimesQ4_21.csv")
+
+hr_q1_22<- read.csv("2022-Q1_HRTravelTimes.csv")
+hr_q2_22<- read.csv("2022-Q2_HRTravelTimes.csv")
+hr_q3_22<- read.csv("2022-Q3_HRTravelTimes.csv")
+
+lr_q1_22<- read.csv("2022-Q1_HRTravelTimes.csv")
+lr_q2_22<- read.csv("2022-Q2_HRTravelTimes.csv")
+lr_q3_22<- read.csv("2022-Q3_HRTravelTimes.csv")
+
+```
+
+```{r}
+bs_11_21<- read.csv("MBTA-Bus-Arrival-Departure-Times_2021-11.csv")
+bs_12_21<- read.csv("MBTA-Bus-Arrival-Departure-Times_2021-12.csv")
+bs_01_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-01.csv")
+bs_02_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-02.csv")
+bs_03_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-03.csv")
+bs_04_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-04.csv")
+bs_05_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-05.csv")
+bs_06_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-06.csv")
+bs_07_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-07.csv")
+bs_08_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-08.csv")
+bs_09_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-09.csv")
+bs_10_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-10.csv")
+
+```
+
+
+```{r}
+#2021 Q4
+hr_q4_21$week_num <- strftime(hr_q4_21$service_date, format = "%V")
+#first week of each month: week 40, 44, 49 
+hr_q4_week<- hr_q4_21 %>% filter(week_num %in% c(40, 44, 49) )
+
+
+#2022 Q1
+hr_q1_22$week_num <- strftime(hr_q1_22$service_date, format = "%V")
+#first week of each month: week 01, 06, 10 
+hr_q1_week<- hr_q1_22 %>% filter(week_num %in% c(01, 06, 10) )
+
+
+#2022 Q2
+hr_q2_22$week_num <- strftime(hr_q2_22$service_date, format = "%V")
+#first week of each month: week 14, 18, 23 
+hr_q2_week<- hr_q2_22 %>% filter(week_num %in% c(14, 18, 23) )
+
+
+#2022 Q3
+hr_q3_22$week_num <- strftime(hr_q3_22$service_date, format = "%V")
+#first week of each month: week 27，31，36 
+hr_q3_week<- hr_q3_22 %>% filter(week_num %in% c(27, 31, 36) )
+
+
+#combine the heavy rail data
+hr_week<- rbind(hr_q4_week, hr_q1_week, hr_q2_week, hr_q3_week)
+
+```
+
+
+```{r}
+#Pick the first week
+#2021 two months
+bs_11_21$week_num <- strftime(bs_11_21$service_date, format = "%V")
+bs_11_21_week<- bs_11_21 %>% filter(week_num == "44" )
+
+bs_12_21$week_num <- strftime(bs_12_21$service_date, format = "%V")
+bs_12_21_week<- bs_12_21 %>% filter(week_num == "49" )
+
+bs_01_22$week_num <- strftime(bs_01_22$service_date, format = "%V")
+bs_01_22_week<- bs_01_22 %>% filter(week_num == "01" )
+
+bs_02_22$week_num <- strftime(bs_02_22$service_date, format = "%V")
+bs_02_22_week<- bs_02_22 %>% filter(week_num == "06" )
+
+bs_03_22$week_num <- strftime(bs_03_22$service_date, format = "%V")
+bs_03_22_week<- bs_03_22 %>% filter(week_num == "10" )
+
+bs_04_22$week_num <- strftime(bs_04_22$service_date, format = "%V")
+bs_04_22_week<- bs_04_22 %>% filter(week_num == "14" )
+
+bs_05_22$week_num <- strftime(bs_05_22$service_date, format = "%V")
+bs_05_22_week<- bs_05_22 %>% filter(week_num == "18" )
+
+bs_06_22$week_num <- strftime(bs_06_22$service_date, format = "%V")
+bs_06_22_week<- bs_06_22 %>% filter(week_num == "23" )
+
+bs_07_22$week_num <- strftime(bs_07_22$service_date, format = "%V")
+bs_07_22_week<- bs_07_22 %>% filter(week_num == "27" )
+
+bs_08_22$week_num <- strftime(bs_08_22$service_date, format = "%V")
+bs_08_22_week<- bs_08_22 %>% filter(week_num == "31" )
+
+bs_09_22$week_num <- strftime(bs_09_22$service_date, format = "%V")
+bs_09_22_week<- bs_09_22 %>% filter(week_num == "36" )
+
+bs_10_22$week_num <- strftime(bs_10_22$service_date, format = "%V")
+bs_10_22_week<- bs_10_22 %>% filter(week_num == "40" )
+
+#combine the heavy rail data
+bs_week<- rbind(bs_11_21_week, bs_12_21_week, bs_01_22_week, bs_02_22_week, bs_03_22_week, bs_04_22_week, bs_05_22_week, bs_06_22_week, bs_07_22_week, bs_08_22_week, bs_09_22_week, bs_10_22_week)
+```
+
+
+
+```{r}
+hr_week %>% 
+  ggplot(aes(travel_time_sec)) + 
+  geom_density() +
+  facet_wrap(week_num)
+```
+
+```{r}
+ggplot(hr_week) +
+  aes(
+    x = service_date,
+    y = travel_time_sec,
+    colour = route_id
+  ) +
+  geom_col() +
+  scale_color_manual(
+    values = c(Blue = "#4438F9",
+    Orange = "#FF7B1C",
+    Red = "#F6374D")
+  ) +
+  theme_minimal()
+
+ggplot(lr_week) +
+  aes(
+    x = service_date,
+    y = travel_time_sec,
+    colour = route_id
+  ) +
+  geom_col() +
+  scale_color_manual(
+    values = c(Blue = "#4438F9",
+    Orange = "#FF7B1C",
+    Red = "#F6374D",
+    `Green-B` = "#008900",
+    `Green-C` = "#00C400",
+    `Green-D` = "#00ED00",
+    `Green-E` = "#45FF45",
+    Mattapan = "#A7A7A7"
+    )
+  ) +
+  theme_minimal()
+```
+
+
+```{r}
+lr_week %>% distinct(route_id)
+```
+
+
+
+
+```{r}
+#test
+ggplot(lr_week) +
+  aes(
+    x = service_date,
+    y = travel_time_sec,
+    colour = route_id
+  ) +
+  geom_bar(stat="identity",position='dodge')+
+  scale_color_manual(
+    values = c(Blue = "#4438F9",
+    Orange = "#FF7B1C",
+    Red = "#F6374D",
+    `Green-B` = "#008900",
+    `Green-C` = "#00C400",
+    `Green-D` = "#00ED00",
+    `Green-E` = "#45FF45",
+    Mattapan = "#A7A7A7"
+    )
+  ) +
+  theme_minimal()
+
+```
+
+
+```{r}
+bs_03_22_week %>%
+ filter(service_date %in% c("2022-03-07", "2022-03-13")) %>%
+ ggplot() +
+  aes(x = scheduled, y = actual, colour = service_date) +
+  geom_tile(alpha= 0.3) +
+  scale_color_manual(
+    values = c(`2022-03-07` = "#1CA0FF",`2022-03-13` = "#FF4277")
+  ) +
+  theme(axis.text.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        )
+  theme_minimal()
+```
+
+```{r}
+bs_03_22_week %>%
+ filter(service_date %in% c("2022-03-07", "2022-03-13")) %>%
+ filter(scheduled_headway >= 0L & scheduled_headway <= 6000L | is.na(scheduled_headway)) %>%
+ filter(headway >= 0L & headway <= 
+ 6000L | is.na(headway)) %>%
+ ggplot() +
+  aes(
+    x = scheduled_headway,
+    y = headway,
+    colour = service_date
+  ) +
+  geom_jitter(size = 1.5, alpha= 0.5) +
+  geom_abline(a= 0,b= 1)
+  scale_color_manual(
+    values = c(`2022-03-07` = "#FF6156", `2022-03-13` = "#5F90FB")
+  ) +
+  theme_minimal()
+```
+This shows the difference of the scheduled time between the trip and the previous trip at the stop between Sunday and Monday.2022-03-07 is Monday and 2022-03-13 is Sunday. If the point is below the line, it means the time that bus stay at the stops is shorter than scheduled. Vice versa. From the graph we can see that those blue points are moving to the right overall compared to the red dots, which means that the headaway time of Sunday is overall longer than Monday. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
