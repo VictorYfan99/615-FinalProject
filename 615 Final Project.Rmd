@@ -13,7 +13,7 @@ library(ggplot2)
 ```
 
 ```{r}
-#Import the dataset
+#Import the railway dataset
 hr_q4_21<- read.csv("HRTravelTimesQ4_21.csv")
 
 lr_q4_21<- read.csv("LRTravelTimesQ4_21.csv")
@@ -29,6 +29,7 @@ lr_q3_22<- read.csv("2022-Q3_HRTravelTimes.csv")
 ```
 
 ```{r}
+#Import the bus data
 bs_11_21<- read.csv("MBTA-Bus-Arrival-Departure-Times_2021-11.csv")
 bs_12_21<- read.csv("MBTA-Bus-Arrival-Departure-Times_2021-12.csv")
 bs_01_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-01.csv")
@@ -46,6 +47,7 @@ bs_10_22<- read.csv("MBTA-Bus-Arrival-Departure-Times_2022-10.csv")
 
 
 ```{r}
+#Pick the first week from each of the 12 months
 #2021 Q4
 hr_q4_21$week_num <- strftime(hr_q4_21$service_date, format = "%V")
 #first week of each month: week 40, 44, 49 
@@ -75,10 +77,40 @@ hr_week<- rbind(hr_q4_week, hr_q1_week, hr_q2_week, hr_q3_week)
 
 ```
 
+```{r}
+#Pick the first week from each of the 12 months
+#2021 Q4
+lr_q4_21$week_num <- strftime(lr_q4_21$service_date, format = "%V")
+#first week of each month: week 40, 44, 49 
+lr_q4_week<- lr_q4_21 %>% filter(week_num %in% c(40, 44, 49) )
+
+
+#2022 Q1
+lr_q1_22$week_num <- strftime(lr_q1_22$service_date, format = "%V")
+#first week of each month: week 01, 06, 10 
+lr_q1_week<- lr_q1_22 %>% filter(week_num %in% c(01, 06, 10) )
+
+
+#2022 Q2
+lr_q2_22$week_num <- strftime(lr_q2_22$service_date, format = "%V")
+#first week of each month: week 14, 18, 23 
+lr_q2_week<- lr_q2_22 %>% filter(week_num %in% c(14, 18, 23) )
+
+
+#2022 Q3
+lr_q3_22$week_num <- strftime(lr_q3_22$service_date, format = "%V")
+#first week of each month: week 27，31，36 
+lr_q3_week<- lr_q3_22 %>% filter(week_num %in% c(27, 31, 36) )
+
+
+#combine the heavy rail data
+lr_week<- rbind(lr_q4_week, lr_q1_week, lr_q2_week, lr_q3_week)
+
+```
 
 ```{r}
-#Pick the first week
-#2021 two months
+#Pick 12 weeks from the bus dataset 
+
 bs_11_21$week_num <- strftime(bs_11_21$service_date, format = "%V")
 bs_11_21_week<- bs_11_21 %>% filter(week_num == "44" )
 
@@ -128,6 +160,7 @@ hr_week %>%
   facet_wrap(week_num)
 ```
 
+#Heavy rail and Light rail
 ```{r}
 ggplot(hr_week) +
   aes(
@@ -165,38 +198,7 @@ ggplot(lr_week) +
 ```
 
 
-```{r}
-lr_week %>% distinct(route_id)
-```
-
-
-
-
-```{r}
-#test
-ggplot(lr_week) +
-  aes(
-    x = service_date,
-    y = travel_time_sec,
-    colour = route_id
-  ) +
-  geom_bar(stat="identity",position='dodge')+
-  scale_color_manual(
-    values = c(Blue = "#4438F9",
-    Orange = "#FF7B1C",
-    Red = "#F6374D",
-    `Green-B` = "#008900",
-    `Green-C` = "#00C400",
-    `Green-D` = "#00ED00",
-    `Green-E` = "#45FF45",
-    Mattapan = "#A7A7A7"
-    )
-  ) +
-  theme_minimal()
-
-```
-
-
+#Comparison of scheduled time and actual time
 ```{r}
 bs_03_22_week %>%
  filter(service_date %in% c("2022-03-07", "2022-03-13")) %>%
@@ -232,7 +234,6 @@ bs_03_22_week %>%
   theme_minimal()
 ```
 This shows the difference of the scheduled time between the trip and the previous trip at the stop between Sunday and Monday.2022-03-07 is Monday and 2022-03-13 is Sunday. If the point is below the line, it means the time that bus stay at the stops is shorter than scheduled. Vice versa. From the graph we can see that those blue points are moving to the right overall compared to the red dots, which means that the headaway time of Sunday is overall longer than Monday. 
-
 
 
 
